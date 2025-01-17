@@ -7,73 +7,108 @@ import { Button, Input } from "@nextui-org/react";
 import { Formik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from 'react';
+
 
 export const Login = () => {
-  const router = useRouter();
+    const router = useRouter();
 
-  const initialValues: LoginFormType = {
-    email: "admin@acme.com",
-    password: "admin",
-  };
+    const initialValues: LoginFormType = {
+        email: "admin@acme.com",
+        password: "admin",
+    };
+    const [showLoader, setShowLoader] = useState(false);
 
-  const handleLogin = useCallback(
-    async (values: LoginFormType) => {
-      // `values` contains email & password. You can use provider to connect user
+    const handleLogin = useCallback(
+        async (values: LoginFormType) => {
+            // `values` contains email & password. You can use provider to connect user
 
-      await createAuthCookie();
-      router.replace("/");
-    },
-    [router]
-  );
+            // console.log(values)
+            setShowLoader(true)
 
-  return (
-    <>
-      <div className='text-center text-[25px] font-bold mb-6'>Login</div>
+            const data = {
+                username : values.email ,
+                password : values.password
+            }
 
-      <Formik
-        initialValues={initialValues}
-        validationSchema={LoginSchema}
-        onSubmit={handleLogin}>
-        {({ values, errors, touched, handleChange, handleSubmit }) => (
-          <>
-            <div className='flex flex-col w-1/2 gap-4 mb-4'>
-              <Input
-                variant='bordered'
-                label='Email'
-                type='email'
-                value={values.email}
-                isInvalid={!!errors.email && !!touched.email}
-                errorMessage={errors.email}
-                onChange={handleChange("email")}
-              />
-              <Input
-                variant='bordered'
-                label='Password'
-                type='password'
-                value={values.password}
-                isInvalid={!!errors.password && !!touched.password}
-                errorMessage={errors.password}
-                onChange={handleChange("password")}
-              />
+            fetch(`${process.env.API_PATH}/api/v1/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            })
+                .then((res) => {
+                    setShowLoader(false)
+                    if (res.status !== 200) {
+                        // toast.error("error");
+                    } else {
+                        return res.json();
+                    }
+                })
+                .then((data) => {
+                    if (data.success){
+                        // @ts-ignore
+                        createAuthCookie( data.data);
+                        // router.replace("/");
+                    }
+                    console.log(data);
+                });
+
+
+
+        },
+        [router]
+    );
+
+    return (
+        <>
+            <div className='text-center text-[25px] font-bold mb-6'>ورود</div>
+            {/*{showLoader && < Loader />}*/}
+            {showLoader && <>loading</>}
+            <Formik
+                initialValues={initialValues}
+                validationSchema={LoginSchema}
+                onSubmit={handleLogin}>
+                {({ values, errors, touched, handleChange, handleSubmit }) => (
+                    <>
+                        <div className='flex flex-col w-1/2 gap-4 mb-4'>
+                            <Input
+                                variant='bordered'
+                                label='Email'
+                                type='email'
+                                value={values.email}
+                                isInvalid={!!errors.email && !!touched.email}
+                                errorMessage={errors.email}
+                                onChange={handleChange("email")}
+                            />
+                            <Input
+                                variant='bordered'
+                                label='Password'
+                                type='password'
+                                value={values.password}
+                                isInvalid={!!errors.password && !!touched.password}
+                                errorMessage={errors.password}
+                                onChange={handleChange("password")}
+                            />
+                        </div>
+
+                        <Button
+                            onPress={() => handleSubmit()}
+                            variant='flat'
+                            color='primary'>
+                            ورود
+                        </Button>
+                    </>
+                )}
+            </Formik>
+
+            <div className='font-light text-slate-400 mt-4 text-sm'>
+                Don&apos;t have an account ?{" "}
+                <Link href='/register' className='font-bold'>
+                    Register here
+                </Link>
             </div>
-
-            <Button
-              onPress={() => handleSubmit()}
-              variant='flat'
-              color='primary'>
-              Login
-            </Button>
-          </>
-        )}
-      </Formik>
-
-      <div className='font-light text-slate-400 mt-4 text-sm'>
-        Don&apos;t have an account ?{" "}
-        <Link href='/register' className='font-bold'>
-          Register here
-        </Link>
-      </div>
-    </>
-  );
+        </>
+    );
 };

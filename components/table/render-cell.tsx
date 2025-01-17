@@ -20,7 +20,7 @@ export const RenderCell = ({ user, columnKey }: Props) => {
           avatarProps={{
             src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
           }}
-          name={cellValue}
+          name={user.email}
         >
           {user.email}
         </User>

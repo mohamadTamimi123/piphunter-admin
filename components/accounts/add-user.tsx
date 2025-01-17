@@ -13,6 +13,10 @@ import React from "react";
 export const AddUser = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+  function handleSubmit(){
+    fetch(`${process.env.API_PATH}/api/v1/users/list`).then(res => res.json()).then(data => console.log(data))
+  }
+
   return (
     <div>
       <>
@@ -32,22 +36,12 @@ export const AddUser = () => {
                 </ModalHeader>
                 <ModalBody>
                   <Input label="Email" variant="bordered" />
-                  <Input label="First Name" variant="bordered" />
-                  <Input label="Last Name" variant="bordered" />
-                  <Input label="Phone Number" variant="bordered" />
-
-                  <Input label="Password" type="password" variant="bordered" />
-                  <Input
-                    label="Confirm Password"
-                    type="password"
-                    variant="bordered"
-                  />
                 </ModalBody>
                 <ModalFooter>
                   <Button color="danger" variant="flat" onClick={onClose}>
                     Close
                   </Button>
-                  <Button color="primary" onPress={onClose}>
+                  <Button color="primary" onPress={handleSubmit}>
                     Add User
                   </Button>
                 </ModalFooter>
